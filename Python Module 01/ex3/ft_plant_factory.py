@@ -1,11 +1,11 @@
 class Plant:
-    def __init__(self, type: str, height: int, age: int):
+    def __init__(self, type: str, height: float, age: int):
         self.type = type
         self.height = height
         self.age = age
 
     def show(self):
-        print(f"Created: {self.type}cm {self.height:.1f}, {self.age} days old")
+        print(f"Created: {self.type} {self.height:.1f}cm, {self.age} days old")
 
     def grow(self, grow_size: float):
         self.height += grow_size

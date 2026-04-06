@@ -1,5 +1,5 @@
 class Plant:
-    def __init__(self, type: str, height: int, age: int):
+    def __init__(self, type: str, height: float, age: int):
         self.type = type
         self.height = height
         self.age = age
