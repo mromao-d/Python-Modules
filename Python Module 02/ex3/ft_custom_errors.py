@@ -18,23 +18,23 @@ def test_errors():
     try:
         raise PlantError()
     except PlantError as e:
-        print(f"Caught {type(e).__name__}: {e}")
+        print(f"Caught {PlantError.__name__}: {e}")
 
     print("\nTesting WaterError...")
     try:
         raise WaterError()
     except WaterError as e:
-        print(f"Caught {type(e).__name__}: {e}")
+        print(f"Caught {WaterError.__name__}: {e}")
 
     print("\nTesting catching all garden errors...")
     try:
         raise PlantError()
     except GardenError as e:
-        print(f"Caught {type(e).__name__}: {e}")
+        print(f"Caught {PlantError.__name__}: {e}")
     try:
         raise WaterError()
     except GardenError as e:
-        print(f"Caught {type(e).__name__}: {e}")
+        print(f"Caught {WaterError.__name__}: {e}")
 
     print("\nAll custom error types work correctly!")
 
