@@ -9,9 +9,10 @@ def test_temperature():
         print(f"Input data is '{el}'")
         try:
             temp = ft_first_exception(el)
-            print(f"Temperature is now {el}°C\n")
-        except:
-            print(f"Caught input_temperature error: invalid literal for int() with base 10: '{el}'\n")
+            print(f"Temperature is now {temp}°C\n")
+        except Exception:
+            raise Exception(f"Caught input_temperature error: \
+invalid literal for int() with base 10: '{el}'\n")
 
     print("All tests completed - program didn't crash!")
 

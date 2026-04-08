@@ -10,17 +10,21 @@ class Plant:
         print(f"{self.type}: {self.height: .1f}cm, {self.age} days old")
 
     def grow(self, grow_size: float):
+        if grow_size < 0:
+            return
         self.height += grow_size
 
     def get_older(self, older_time: int):
+        if older_time < 0:
+            return
         self.age += older_time
 
     def show_evolution(self, grow_size: float, older_time: int):
         for i in range(self.start, self.end):
             print(f"=== Day {i} ===")
             self.show()
-            self.height += grow_size
-            self.age += older_time
+            self.grow(grow_size)
+            self.get_older(older_time)
         print(f"Growth this week: {(self.end - self.start) * grow_size:.0f}cm")
 
 

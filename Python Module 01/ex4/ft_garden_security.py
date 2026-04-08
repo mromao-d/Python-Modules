@@ -6,7 +6,8 @@ class Plant:
         self.show()
 
     def show(self):
-        print(f"Plant created: {self._type}: {self.get_height():.1f}cm, {self.get_age()} days old")
+        print(f"Plant created: {self._type}: \
+{self._height:.1f}cm, {self._age} days old")
 
     def get_height(self) -> float:
         return self._height
@@ -24,7 +25,7 @@ class Plant:
             return
         else:
             print(f"{self._type}: Error, height can't be negative")
-            print(f"Height update rejected")
+            print("Height update rejected")
             return
 
     def set_age(self, age: int):
@@ -34,13 +35,17 @@ class Plant:
             return
         else:
             print(f"{self._type}: Error, age can't be negative")
-            print(f"Age update rejected")
+            print("Age update rejected")
             return
 
     def grow(self, grow_size: float):
-        self._height += grow_size   
+        if grow_size < 0:
+            return
+        self._height += grow_size
 
     def get_older(self, older_time: int):
+        if older_time < 0:
+            return
         self._age += older_time
 
 
