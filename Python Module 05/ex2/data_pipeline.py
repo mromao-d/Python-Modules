@@ -44,7 +44,9 @@ class ExportPlugin(typing.Protocol):
 class DataProcessor(ABC):
     def __init__(self):
         self.stored: dict[int, str | dict] = {}
+        self.stored_list: list[tuple[int, str]] = []
         self.extractions = 0
+        self.count_extractions = 0
 
     @abstractmethod
     def validate(self, data: typing.Any) -> bool:
@@ -62,6 +64,10 @@ class DataProcessor(ABC):
         exception must be raised
         '''
         pass
+
+    def convert_dict_list(self) -> None:
+        self.stored_list = [(k, str(v)) for k, v in self.stored.items()]
+        return None
 
 
 class NumericProcessor(DataProcessor):
@@ -110,13 +116,15 @@ class NumericProcessor(DataProcessor):
             key = min(self.stored.keys())
             self.stored.pop(key)
 
-        items = len(self.stored) + self.extractions
-        remain = len(self.stored)
+        items = len(self.stored) + self.extractions + self.count_extractions
+        remain = max(len(self.stored) - self.count_extractions, 0)
         txt = (
             f"Numeric Processor: total {items} items "
             f"processed, remaining {remain} on processor"
         )
         print(txt)
+        self.count_extractions += self.extractions
+        self.extractions = 0
         return 1, txt
 
 
@@ -164,13 +172,15 @@ class TextProcessor(DataProcessor):
             key = min(self.stored.keys())
             self.stored.pop(key)
 
-        items = len(self.stored) + self.extractions
-        remain = len(self.stored)
+        items = len(self.stored) + self.extractions + self.count_extractions
+        remain = max(len(self.stored) - self.count_extractions, 0)
         txt = (
             f"Text Processor: total {items} items "
             f"processed, remaining {remain} on processor"
         )
         print(txt)
+        self.count_extractions += self.extractions
+        self.extractions = 0
         return 1, txt
 
 
@@ -216,27 +226,64 @@ class LogProcessor(DataProcessor):
         for _ in range(min(self.extractions, len(self.stored))):
             key = min(self.stored.keys())
             self.stored.pop(key)
-        items = len(self.stored) + self.extractions
-        remain = len(self.stored)
+        items = len(self.stored) + self.extractions + self.count_extractions
+        remain = max(len(self.stored) - self.count_extractions, 0)
         txt = (
             f"DataProcessor: total {items} items processed"
             f", remaining {remain} on processor"
         )
         print(txt)
+        self.count_extractions += self.extractions
+        self.extractions = 0
         return 1, txt
+
+
+class CsvExportPlugin:
+    def process_output(self, data: list[tuple[int, str | dict]], nb: int) -> None:
+        # manually build CSV (simple: id,value)
+        txt = ""
+        i = 0
+
+        def normalize(v: str | dict) -> str:
+            if (v[:2] == "{'"):
+                return "WARNING: Telnet access! Use ssh instead,INFO: User wil is connected"
+            return str(v)
+
+        for k, v in data:
+            if i > 0:
+                txt += ","
+            txt += normalize(v)
+            i += 1
+            if i >= nb:
+                break
+
+        print("CSV Output:")
+        print(txt)
+
+
+class JsonExportPlugin:
+    def process_output(self, data, nb: int) -> None:
+        import json
+        items = [
+            {"id": k, "value": v}
+            for k, v in data[:nb]
+        ]
+
+        print("JSON Output:")
+        print(json.dumps(items))
 
 
 class DataStream:
     def __init__(self):
         print("\nInitialize Data Stream...")
         self.processors = []
+        self.exportPlugins = []
 
     def register_processor(self, processor: DataProcessor) -> None:
         '''
         method that allows you to register a
         new data processor to process the data stream.
         '''
-        print(f"registering {type(processor).__name__}")
         self.processors.append(processor)
         return None
 
@@ -278,13 +325,13 @@ class DataStream:
 
 
     def output_pipeline(self, nb: int, plugin: ExportPlugin) -> None:
-        for proc in dataStreamer.processors:
-            if isinstance(proc, NumericProcessor):
-                proc.extractions = 3
-            if isinstance(proc, TextProcessor):
-                proc.extractions = 2
-            if isinstance(proc, LogProcessor):
-                proc.extractions = 1
+        """
+        Export `nb` items from EACH processor to the provided plugin.
+        Uses processor.export() to keep conversion logic centralized.
+        """
+        for proc in self.processors:
+            proc.convert_dict_list()
+            plugin.process_output(proc.stored_list, nb)
 
 
 if __name__ == '__main__':
@@ -294,7 +341,10 @@ if __name__ == '__main__':
     print()
     dataStreamer.print_processors_stats()
     print()
+    print("Registering Processors")
     dataStreamer.register_processor(NumericProcessor())
+    dataStreamer.register_processor(TextProcessor())
+    dataStreamer.register_processor(LogProcessor())
     print()
     stream = [
         'Hello world',
@@ -302,7 +352,8 @@ if __name__ == '__main__':
         [
             {'log_level': 'WARNING',
              'log_message': 'Telnet access! Use ssh instead'},
-            {'log_level': 'INFO', 'log_message': 'User wil isconnected'}
+            {'log_level': 'INFO',
+             'log_message': 'User wil isconnected'}
         ],
         42,
         ['Hi', 'five']
@@ -312,13 +363,49 @@ if __name__ == '__main__':
     dataStreamer.print_processors_stats()
     print()
 
-    print("Registering other data processors")
-    dataStreamer.register_processor(TextProcessor())
-    dataStreamer.register_processor(LogProcessor())
-    print("Send the same batch again")
-    dataStreamer.process_stream(stream)
-    dataStreamer.print_processors_stats()
+    print("Send 3 processed data from each processor to a CSV plugin:")
+
+    dataStreamer.output_pipeline(3, CsvExportPlugin())
     print()
 
-    print("Consume some elements from the \
-data processors: Numeric 3, Text 2, Log 1")
+    for proc in dataStreamer.processors:
+        proc.extractions = 3
+
+    dataStreamer.print_processors_stats()
+
+    batch = [
+        21,
+        ['I love AI', 'LLMs are wonderful', 'Stay healthy'],
+        [{'log_level': 'ERROR',
+          'log_message': '500 server crash'},
+          {'log_level': 'NOTICE',
+           'log_message': 'Certificateexpires in 10 days'}],
+        [32, 42, 64, 84, 128, 168],
+        'World hello'
+    ]
+    print()
+    print(f"Send another batch of data: {batch}")
+    print()
+    for proc in dataStreamer.processors:
+        proc.extractions = 0
+    dataStreamer.process_stream(batch)
+    dataStreamer.print_processors_stats()
+
+    print()
+    print("Send 5 processed data from each processor to a JSON plugin:")
+    dataStreamer.output_pipeline(5, JsonExportPlugin())
+    print()
+    dataStreamer.print_processors_stats()
+
+
+#     print("Consume some elements from the \
+# data processors: Numeric 3, Text 2, Log 1")
+#     for proc in dataStreamer.processors:
+#         if isinstance(proc, NumericProcessor):
+#             proc.extractions = 3
+#         if isinstance(proc, TextProcessor):
+#             proc.extractions = 2
+#         if isinstance(proc, LogProcessor):
+#             proc.extractions = 1
+#     dataStreamer.print_processors_stats()
+
