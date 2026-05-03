@@ -9,7 +9,7 @@ class InvDataException(Exception):
 
 class DataProcessor(ABC):
     def __init__(self):
-        self.stored: dict[int, str | dict] = {}
+        self.stored = tuple()
         self.extractions = 0
 
     @abstractmethod
@@ -110,11 +110,11 @@ class TextProcessor(DataProcessor):
             if not self.validate(data):
                 raise InvDataException("Got exception: Improper numeric data")
             print(f"processing data: {data}")
-            if isinstance(data, data):
+            if isinstance(data, dict):
                 new_key = max(self.stored.keys(), default=-1) + 1
                 self.stored.update({new_key: str(data)})
                 return None
-            else:
+            elif isinstance(data, list):
                 i = 0
                 for el in data:
                     new_key = max(self.stored.keys(), default=-1) + 1
@@ -139,7 +139,7 @@ class LogProcessor(DataProcessor):
             return True
         return False
 
-    def ingest(self, data: dict) -> None:
+    def ingest(self, data: dict[str, str] | list[dict[str, str]]) -> None:
         '''
         In case the user
         does not validate the data before calling ingest,
