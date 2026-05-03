@@ -9,7 +9,7 @@ class InvDataException(Exception):
 
 class DataProcessor(ABC):
     def __init__(self):
-        self.stored: dict[int, str | dict] = {}
+        self.stored = {}
         self.extractions = 0
 
     @abstractmethod
@@ -114,7 +114,7 @@ class TextProcessor(DataProcessor):
                 new_key = max(self.stored.keys(), default=-1) + 1
                 self.stored.update({new_key: str(data)})
                 return None
-            else:
+            elif isinstance(data, list):
                 i = 0
                 for el in data:
                     new_key = max(self.stored.keys(), default=-1) + 1
