@@ -195,3 +195,48 @@ class TransformCreatureFactory(CreatureFactory):
 
     def create_evolved(self) -> Creature:
         return Morphagon()
+
+
+class BattleStrategy(ABC):
+    @abstractmethod
+    def act(self, creature: Creature) -> list[str]:
+        pass
+
+    @abstractmethod
+    def is_valid(self, creature: Creature) -> bool:
+        pass
+
+
+class IsValidError(Exception):
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
+class NormalStrategy(BattleStrategy):
+    def is_valid(self, creature: Creature) -> bool:
+        if isinstance(creature, Creature):
+            return True
+        return False
+
+    def act(self, creature: Creature) -> list[str]:
+        if not self.is_valid(creature):
+            raise IsValidError(f"{creature.name} is not a Creature")
+        return [creature.attack()]
+
+
+class AggressiveStrategy(BattleStrategy):
+    def is_valid(self, creature: Creature) -> bool:
+        if isinstance(creature, TransformCapability):
+            return True
+        return False
+
+    def act(self, creature: Creature) -> list[str]:
+        if not self.is_valid(creature):
+            raise IsValidError(f"{creature.name} is does not have a TransformCapability")
+        return [creature.transform(), creature.attack(), creature.revert()]
+
+# class DefensiveStrategy(
+#     BattleStrategy,
+#     HealCapability
+# ):
+#     def is_valid(self) -> bool:

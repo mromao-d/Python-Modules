@@ -1,3 +1,6 @@
+from ex0 import CreatureFactory, FlameFactory, AquaFactory
+
+
 def single_function(fact_obj: CreatureFactory) -> None:
     base = fact_obj.create_base()
     evolved = fact_obj.create_evolved()
@@ -18,6 +21,7 @@ def another_function(fact1: FlameFactory, fact2: AquaFactory) -> None:
     print(" fight!")
     print(flame.attack())
     print(aqua.attack())
+
 
 if __name__ == '__main__':
     flame = FlameFactory()
