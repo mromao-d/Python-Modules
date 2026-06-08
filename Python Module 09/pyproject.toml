@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "python module 09"
+version = "0.1.0"
+description = ""
+authors = ["mromao-d <romaog.manuel@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.13.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

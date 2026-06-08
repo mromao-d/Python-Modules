@@ -213,6 +213,10 @@ class IsValidError(Exception):
 
 
 class NormalStrategy(BattleStrategy):
+    '''
+    suitable for any Creature, that will simply use the
+    attack method during the tournament.
+    '''
     def is_valid(self, creature: Creature) -> bool:
         if isinstance(creature, Creature):
             return True
@@ -225,6 +229,10 @@ class NormalStrategy(BattleStrategy):
 
 
 class AggressiveStrategy(BattleStrategy):
+    '''
+    suitable for Creature with transform capabilities,
+    that will transform, attack, and revert during the tournament.
+    '''
     def is_valid(self, creature: Creature) -> bool:
         if isinstance(creature, TransformCapability):
             return True
@@ -232,11 +240,22 @@ class AggressiveStrategy(BattleStrategy):
 
     def act(self, creature: Creature) -> list[str]:
         if not self.is_valid(creature):
-            raise IsValidError(f"{creature.name} is does not have a TransformCapability")
+            raise IsValidError(f"Battle Error, aborting tournment: Invalide Creature '{creature.name}' for this aggressive strategy")
         return [creature.transform(), creature.attack(), creature.revert()]
 
-# class DefensiveStrategy(
-#     BattleStrategy,
-#     HealCapability
-# ):
-#     def is_valid(self) -> bool:
+
+class DefensiveStrategy(BattleStrategy):
+    '''
+    suitable for Creature with healing capabilities, that
+    will attack and then heal during the tournament.
+    '''
+    def is_valid(self, creature: Creature) -> bool:
+        if isinstance(creature, HealCapability):
+            return True
+        return False
+
+    def act(self, creature: Creature) -> list[str]:
+        if not self.is_valid(creature):
+            raise IsValidError(f"Battle Error, aborting tournment: Invalide Creature '{creature.name}' for this defensive strategy")
+        return [creature.attack(), creature.heal()]
+        # return [creature.attack()]
