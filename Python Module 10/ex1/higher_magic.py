@@ -5,15 +5,15 @@ test_values = [21, 23, 8]
 test_targets = ['Dragon', 'Goblin', 'Wizard', 'Knight']
 
 
-def hit(target: str, power: int)-> str:
+def hit(target: str, power: int) -> str:
     return f"target {target} is hit with {power} power"
 
 
-def hit_back(target: str, power: int)-> str:
+def hit_back(target: str, power: int) -> str:
     return f"target {target} hits back with {power} power"
 
 
-def hit_aa(target: str, power: int)-> str:
+def hit_aa(target: str, power: int) -> str:
     return f"aa target {target} hits back with {power} power"
 
 
@@ -25,7 +25,7 @@ def power_amplifier(base_spell: Callable, multiplier: int) -> Callable:
     return lambda target, power: base_spell(target, multiplier * power)
 
 
-def condition(target: str, power: int)-> str:
+def condition(target: str, power: int) -> bool:
     if target == 'asap' and power > 0:
         return True
     return False
@@ -36,11 +36,14 @@ def conditional_caster(condition: Callable, spell: Callable) -> Callable:
     def print_fizz() -> str:
         return "Spell fizzled"
 
-    return lambda target, power: spell(target, power) if condition(target, power) else print_fizz()
+    return (lambda target, power:
+            spell(target, power) if condition(target, power) else print_fizz())
 
 
 def spell_sequence(spells: list[Callable]) -> Callable:
-    return lambda target, power: sorted([spell(target, power) for spell in spells])
+    return (lambda target, power: sorted([
+        spell(target, power) for spell in spells
+    ]))
 
 
 def main():

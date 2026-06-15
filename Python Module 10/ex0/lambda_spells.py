@@ -15,12 +15,13 @@ mages = [
 
 spells = ['meteor', 'tsunami', 'lightning', 'freeze']
 
+
 def artifact_sorter(artifacts: list[dict]) -> list[dict]:
-    return sorted(artifacts, key=lambda x: x.get('power'))
+    return sorted(artifacts, key=lambda x: x.get('power', 0))
 
 
 def power_filter(mages: list[dict], min_power: int) -> list[dict]:
-    return list(filter(lambda x: x.get('power') >= min_power, mages))
+    return list(filter(lambda x: x.get('power', 0) >= min_power, mages))
 
 
 def spell_transformer(spells: list[str]) -> list[str]:
@@ -28,13 +29,17 @@ def spell_transformer(spells: list[str]) -> list[str]:
 
 
 def mage_stats(mages: list[dict]) -> dict:
-    max_p = filter(lambda x: x.get('power') == max(mage.get('power') for mage in mages), mages)
-    min_p = filter(lambda x: x.get('power') == min(mage.get('power') for mage in mages), mages)
-    total_p = sum(mage.get('power') for mage in mages)
+    max_p = filter(lambda x:
+                   x.get('power', 0) == max(mage.get('power', 0)
+                                            for mage in mages), mages)
+    min_p = filter(lambda x:
+                   x.get('power', 0) == min(mage.get('power', 0)
+                                            for mage in mages), mages)
+    total_p = sum(mage.get('power', 0) for mage in mages)
     # out: dict[int, int, float] = {}
     out = {
-        'max_power': list(max_p)[0].get('power'),
-        'min_power': list(min_p)[0].get('power'),
+        'max_power': list(max_p)[0].get('power', 0),
+        'min_power': list(min_p)[0].get('power', 0),
         'avg_power': round(total_p / len(mages), 2),
     }
     return out
@@ -43,9 +48,9 @@ def mage_stats(mages: list[dict]) -> dict:
 if __name__ == '__main__':
     print("Testing artifact sorter...")
     print("Sorted list:")
-    sorted = artifact_sorter(artifacts)
-    for i in range(len(sorted)):
-        print(f"{i} - {sorted[i]}")
+    sort = artifact_sorter(artifacts)
+    for i in range(len(sort)):
+        print(f"{i} - {sort[i]}")
     print()
     min_strength = 90
     print(f"Mages stronger than: {min_strength}")
