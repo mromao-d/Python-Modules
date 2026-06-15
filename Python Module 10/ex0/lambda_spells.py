@@ -41,10 +41,21 @@ def mage_stats(mages: list[dict]) -> dict:
 
 
 if __name__ == '__main__':
-    print(artifact_sorter(artifacts))
+    print("Testing artifact sorter...")
+    print("Sorted list:")
+    sorted = artifact_sorter(artifacts)
+    for i in range(len(sorted)):
+        print(f"{i} - {sorted[i]}")
     print()
-    print(power_filter(mages, 90))
+    min_strength = 90
+    print(f"Mages stronger than: {min_strength}")
+    filtered = power_filter(mages, min_strength)
+    for i in range(len(filtered)):
+        print(f"{i} - {filtered[i]}")
     print()
+    print("Spells transformed:")
     print(spell_transformer(spells))
     print()
-    print(mage_stats(mages))
+    print("Spells stats:")
+    for key, value in mage_stats(mages).items():
+        print(f"{key}: {value}")
