@@ -1,6 +1,7 @@
 import os
 
-def detect_venv() -> tuple[bool, str]:
+
+def detect_venv() -> tuple[bool, str | None]:
     import sys
     if sys.prefix == sys.base_prefix:
         return False, "This is NOT a virtual environment"
@@ -14,7 +15,7 @@ def display_info(env_funct) -> None:
         print("MATRIX STATUS: You're still plugged in")
         print()
         print(f"Current Python: {os.getenv('_')}")
-        print(f"Virtual Environment: None detected")
+        print("Virtual Environment: None detected")
         print()
         print("WARNING: You're in the global environment!")
         print("The machines can see everything you install.")
@@ -38,7 +39,7 @@ def display_info(env_funct) -> None:
         print("Package installation path:")
         print(site.getsitepackages()[0])
 
-    # return None
+    return None
 
 
 if __name__ == '__main__':

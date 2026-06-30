@@ -31,13 +31,14 @@ def read_api_data() -> dict:
                 "date_from": "2025-01-01",
                 "date_to": "2026-06-01",
                 "offset": offset,
-                "limit":limit,
+                "limit": limit,
             }
 
             response = requests.get(f"{url}eod", params=params)
             if response.status_code != 200:
-                raise requests.RequestException(f"Invalid response: {response.status_code}")
-            
+                txt = f"Invalid response: {response.status_code}"
+                raise requests.RequestException(txt)
+
             payload = response.json()
             page_data = payload.get('data', [])
             pagination = payload.get('pagination', {})
@@ -49,7 +50,7 @@ def read_api_data() -> dict:
 
             # prepare next request
             count = pagination.get('count', len(page_data))
-            total = pagination.get('total')
+            # total = pagination.get('total')
             offset += count
 
             if count < limit:
@@ -61,7 +62,6 @@ def read_api_data() -> dict:
             },
             "data": all_data
         }
-
 
     except Exception as e:
         raise type(e)(f"Error is {e}")
@@ -75,12 +75,12 @@ def check_libs() -> bool:
     ok = {}
     nok = []
 
-    imports = list(set(["pandas","numpy", "requests","matplotlib"]))
+    imports = list(set(["pandas", "numpy", "requests", "matplotlib"]))
 
     for module in imports:
         try:
             mod = __import__(module)
-            ok[mod.__name__]= mod.__version__
+            ok[mod.__name__] = mod.__version__
         except Exception as e:
             nok.append(module)
             txt = (
@@ -109,11 +109,11 @@ def check_libs() -> bool:
     return False
 
 
-def read_data() -> list:
+def read_data() -> dict:
     import pandas as pd
     import numpy as np
 
-    data = {'date':[], 'value':[]}
+    data: dict = {'date': [], 'value': []}
     dates = pd.date_range("2025-01-01", "2025-02-01")
     data["date"].extend(dates)
     data["value"].extend(np.random.randint(0, 1000, len(dates)))
@@ -123,7 +123,7 @@ def read_data() -> list:
 
 def main() -> None:
     try:
-        if check_libs() == False:
+        if check_libs() is False:
             return None
         import pandas as pd
         import matplotlib.pyplot as plt
@@ -135,7 +135,7 @@ def main() -> None:
         print(f"Processing {len(pd_df)} data points...")
         pd_df['date'] = pd.to_datetime(pd_df['date'])
 
-        plt.plot(pd_df['date'], pd_df['value'], linestyle = 'solid')
+        plt.plot(pd_df['date'], pd_df['value'], linestyle='solid')
 
         # Add title and axis labels
         plt.title('Time Series Plot')
