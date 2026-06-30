@@ -11,10 +11,10 @@ def spell_reducer(spells: list[int], operation: str) -> int:
         spell_list = {
             "add": add,
             "mul": mul,
-            "max": max,
-            "min": min,
+            "max": lambda a, b: a if a > b else b,
+            "min": lambda a, b: a if a < b else b,
         }
-        if operation not in spell_list.keys():
+        if operation not in spell_list:
             raise ValueError(f"operation {operation} not supported")
         return reduce(spell_list[operation], spells)
     except Exception as e:
